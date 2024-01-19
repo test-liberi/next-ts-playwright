@@ -1,190 +1,59 @@
 'use client'
+
+
+import Link from 'next/link';
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Textarea } from "@/components/ui/textarea";
-import { useFieldArray, useForm } from "react-hook-form";
-import z from 'zod'
-import { Popover } from "@/components/ui/popover";
-
-
-const drugFormSchema = z.object({
-  name_en: z
-    .string()
-    .min(2, {
-      message: "Drug name must be at least 2 characters.",
-    }),
-    name_fr: z
-    .string()
-    .min(2, {
-      message: "Drug name must be at least 2 characters.",
-    }),
-    Type: z
-    .string()
-    .min(2, {
-      message: "Type must be at least 2 characters.",
-    }),
-    Category: z
-    .string()
-    .min(2, {
-      message: "Type must be at least 2 characters.",
-    }),
-    Max_Allowed_Qty: z
-    .number()
-    .min(1, {
-      message: "Max_Allowed_Qty must be at least 2 characters.",
-    }),
-    Unit: z
-    .string()
-    .min(2, {
-      message: "Unit  must be at least 2 characters.",
-    }),
-    Added: z
-    .date(),
-    Description: z
-    .string()
-    .min(2, {
-      message: "Description must be at least 2 characters.",
-    })
-})
-
-type DrugFormValues = z.infer<typeof drugFormSchema>
-
-
-const defaultValues: Partial<DrugFormValues> = {}
+import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { useDeleteDrug, useGetAllDrugs } from '@/services/drugs';
+import { CrossCircledIcon, Pencil2Icon } from '@radix-ui/react-icons';
 
 export default function Home() {
 
-  const form = useForm<DrugFormValues>({
-    resolver: zodResolver(drugFormSchema),
-    defaultValues,
-    mode: "onChange",
-  })
-
-  function onSubmit(data: DrugFormValues) {
-    console.log(data)
-  }
+  const {data} = useGetAllDrugs()
+  const deleteDrug = useDeleteDrug()
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div>
-            <div>
-              <FormLabel>Name </FormLabel>
+  <div className="flex flex-col p-20 ">
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-semibold py-10">Drugs</h1>
+                <Link href="/new"><Button>Add Drug</Button></Link>
             </div>
-            <div className="flex space-x-2">
-              <FormField
-                control={form.control}
-                name="name_en"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Eng 🇺🇸</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Iopamiro 370mg/ml solution for injection 100ml" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="name_en"
-                render={({ field }) => 
-                  <FormItem>
-                    <FormLabel>Fr 🇫🇷</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Iopamiro 370mg/ml solution injectable 100ml" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                }
-              />
-            </div>
-          </div>
+            <Table className="bg-slate-100 rounded-sm p-3">
+                <TableCaption>A list of all stored drugs</TableCaption>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead className="w-[200px]">Name - en</TableHead>
+                    <TableHead className="w-[200px]">Name - fr</TableHead>
+                    <TableHead className="w-[100px]">Type</TableHead>
+                    <TableHead className="w-[100px]">Category</TableHead>
+                    <TableHead className="w-[100px]">Max Allowed Qty</TableHead>
+                    <TableHead className="w-[100px]">Unit</TableHead>
+                    <TableHead className="w-[100px]">Added on</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Action</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                   {data?.map((drug) => (
+                      <TableRow key={drug.id}>
+                       <TableCell className="font-medium"> {drug.name_en} </TableCell>
+                       <TableCell className="font-medium"> {drug.name_fr} </TableCell>
+                       <TableCell>{drug.Type}</TableCell>
+                       <TableCell>{drug.Category}</TableCell>
+                       <TableCell>{drug.Max_Allowed_Qty}</TableCell>
+                       <TableCell>{drug.Unit}</TableCell>
+                       <TableCell>{drug.Added}</TableCell>
+                       <TableCell>{drug.Description}</TableCell>
+                       <TableCell className="text-right flex">
+                          <button className='hover:bg-slate-200 px-2 py-1'> <Pencil2Icon/> </button>
+                          <button className='hover:bg-slate-200 px-2 py-1' onClick={() => deleteDrug.mutate(drug.id)}> <CrossCircledIcon/> </button>
+                       </TableCell>
+                      </TableRow>
+                   ))}
+                </TableBody>
+            </Table>
 
-          <div className="flex space-x-2">
-              <FormField
-                control={form.control}
-                name="Type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Type</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Drug" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="Category"
-                render={({ field }) => 
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Medicine" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                }
-              />
-            </div>
+        </div>
 
-            <div className="flex space-x-2">
-              <FormField
-                control={form.control}
-                name="Max_Allowed_Qty"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Max Allowed Quantity</FormLabel>
-                    <FormControl>
-                      <Input type="10" placeholder="shadcn" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="Unit"
-                render={({ field }) => 
-                  <FormItem>
-                    <FormLabel>Unit</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Pc(s)" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                }
-              />
-            </div>
-          <FormField
-            control={form.control}
-            name="Description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Bio</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Iopamidol 370 mg/ml solution for injection 100ml"
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                {/* <FormDescription>
-                  You can <span>@mention</span> other users and organizations to
-                  link to them.
-                </FormDescription> */}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit">Add drug</Button>
-        </form>
-      </Form>
-    </main>
   );
 }
