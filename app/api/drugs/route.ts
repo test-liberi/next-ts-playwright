@@ -1,15 +1,13 @@
-import sqlite3 from "sqlite3";
-import { open ,Database} from "sqlite";
+
+import { getDBConnection, response } from "../utils";
 import { IDrug } from "../types";
 import { NextRequest, NextResponse } from "next/server";
-
-let db: Database | null = null;
 
 
 // get all drugs
 export async function GET(req:NextRequest,res:NextResponse){
     // open new db connection if not already open
-    await checkDbConnection();
+    const db = await getDBConnection();
 
 
     const drugs = await db!.all<IDrug[]>('SELECT * FROM drugs');
@@ -19,9 +17,9 @@ export async function GET(req:NextRequest,res:NextResponse){
 
 // create drug
 export async function POST(req:NextRequest,res:NextResponse){
-    await checkDbConnection();
+    const db = await getDBConnection();
 
-    const {name_en,name_fr,Type,Category,Max_Allowed_Qty,Unit,Added,Description} = await req.json() satisfies IDrug;
+    const {name_en,name_fr,Type,Category,Max_Allowed_Qty,Unit,Added,Description} = await req.json();
 
     await db!.run(
         `INSERT INTO drugs (name_en,name_fr,Type,Category,Max_Allowed_Qty,Unit,Added,Description) VALUES (?,?,?,?,?,?,?,?)`,
@@ -34,45 +32,25 @@ export async function POST(req:NextRequest,res:NextResponse){
 
 // update drug
 export async function PUT(req:NextRequest,res:NextResponse){
-    await checkDbConnection();
+    const db = await getDBConnection();
 
-    const {id,name_en,name_fr,Type,Category,Max_Allowed_Qty,Unit,Added,Description} = await req.json() satisfies IDrug;
+    const body = await req.json() satisfies IDrug;
+    const {id,name_en,name_fr,Type,Category,Max_Allowed_Qty,Unit,Added,Description} = body
+    console.log(body)
 
     await db!.run(
-        `UPDATE drugs SET name_en = ?,name_fr = ?,Type = ?,Category = ?,Max_Allowed_Qty = ?,Unit = ?,Added = ?,Description = ? WHERE id = ?`,
-        [name_en,name_fr,Type,Category,Max_Allowed_Qty,Unit,Added,Description,id]
+        `UPDATE drugs SET name_en = $name_en, name_fr = $name_fr, Type = $Type, Category = $Category, Max_Allowed_Qty = $Max_Allowed_Qty, Unit = $Unit, Description = $Description WHERE id = $id`,
+        {$name_en: name_en, $name_fr: name_fr, $Type: Type, $Category: Category, $Max_Allowed_Qty: Max_Allowed_Qty, $Unit: Unit, $Description: Description, $id: id},
+        (err) => {
+            if(err){
+                console.log(err)
+            }
+        }
     )
 
     return response({message: 'Drug updated successfully'})
 }
 
 
-// delete drug
-export async function DELETE(req:NextRequest,res:NextResponse){
-    await checkDbConnection();
 
-    const {id} = await req.json() satisfies IDrug;
 
-    await db!.run(
-        `DELETE FROM drugs WHERE id = ?`,
-        [id]
-    )
-
-    return response({message: 'Drug deleted successfully'})
-}
-
-const response = <T>(res:T,status = 200) => {
-    return new Response(JSON.stringify(res),{
-        headers: {'content-type': 'application/json;charset=UTF-8'},
-        status
-    })
-}
-
-const checkDbConnection = async () => {
-    if(!db){
-        db = await open({
-            filename: './medicals.db',
-            driver: sqlite3.Database
-        })
-    }
-}

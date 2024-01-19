@@ -13,6 +13,17 @@ export function useGetAllDrugs(){
     })
 }
 
+export function useGetDrugById(id:number){
+    return useQuery<IDrug>(
+        {
+            queryKey: ['drugs',id],
+            queryFn: async ()=>{
+                const res = await fetch(`/api/drugs/${id}`);
+                return res.json();
+            }
+    })
+}
+
 export function useCreateDrug<IDrug>(){
 
     const queryClient = useQueryClient();
@@ -43,6 +54,7 @@ export function useUpdateDrug<IDrug>(){
             return res.json();
         },
         onSuccess: () => {
+            console.log('onsuccess')
             queryClient.invalidateQueries({queryKey:['drugs']})
         }
     })
@@ -50,17 +62,18 @@ export function useUpdateDrug<IDrug>(){
 
 export function useDeleteDrug<IDrug>(){
     const queryClient = useQueryClient();
+    const drugsQuery = useGetAllDrugs();
 
     return useMutation({
-        mutationFn: async (deletedDrug:{id:string})=>{
-            const res = await fetch('/api/drugs',{
-                method: 'DELETE',
-                body: JSON.stringify(deletedDrug)
+        mutationFn: async (id:number)=>{
+            const res = await fetch(`/api/drugs/${id}`,{
+                method: 'DELETE'
             })
             return res.json();
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey:['drugs']})
+            drugsQuery.refetch();
         }
     })
 }

@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useDeleteDrug, useGetAllDrugs } from '@/services/drugs';
 import { CrossCircledIcon, Pencil2Icon } from '@radix-ui/react-icons';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-
+  const router = useRouter();
   const {data} = useGetAllDrugs()
   const deleteDrug = useDeleteDrug()
 
@@ -45,8 +46,8 @@ export default function Home() {
                        <TableCell>{drug.Added}</TableCell>
                        <TableCell>{drug.Description}</TableCell>
                        <TableCell className="text-right flex">
-                          <button className='hover:bg-slate-200 px-2 py-1'> <Pencil2Icon/> </button>
-                          <button className='hover:bg-slate-200 px-2 py-1' onClick={() => deleteDrug.mutate(drug.id)}> <CrossCircledIcon/> </button>
+                          <button className='hover:bg-slate-200 px-2 py-1' onClick={() => router.push(`/edit/${drug.id!}`)}> <Pencil2Icon/> </button>
+                          <button className='hover:bg-slate-200 px-2 py-1' onClick={() => deleteDrug.mutate(drug.id!)}> <CrossCircledIcon/> </button>
                        </TableCell>
                       </TableRow>
                    ))}
