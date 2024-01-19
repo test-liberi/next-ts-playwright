@@ -23,8 +23,9 @@ export default function NewDrug(){
   })
 
   function onSubmit(data: DrugFormValues) {
-    createDrug.mutate(data)
-    router.push('/')
+    createDrug.mutateAsync(data).then(() => {
+      router.push('/')
+    })
   }
 
     return (
