@@ -1,6 +1,6 @@
 import sqlite3 from "sqlite3";
 import { open ,Database} from "sqlite";
-import { IDrug } from "./types";
+import { IDrug } from "../types";
 import { NextRequest, NextResponse } from "next/server";
 
 let db: Database | null = null;
