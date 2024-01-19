@@ -24,7 +24,7 @@ const db = new sqlite3.Database(
             name_fr TEXT,
             Type VARCHAR,
             Category VARCHAR,
-            "Max Allowed Qty" VARCHAR,
+            "Max_Allowed_Qty" VARCHAR,
             Unit VARCHAR,
             Added DATE,
             Description TEXT
