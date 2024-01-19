@@ -5,9 +5,9 @@ export interface IDrug{
     name_fr: string;
     Type: string;
     Category: string;
-    Max_Allowed_Qty: string;
+    Max_Allowed_Qty?: number;
     Unit: string;
-    Added: string;
+    Added?: string;
     Description: string;
 } 
 
